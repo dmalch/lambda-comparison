@@ -86,7 +86,7 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
         public Void get() {
             final int age = Collections.min(db.getSales()
                     .filter((Sale sale)->sale.getCost() > 50000.00)
-                    .map((Sale sale)->sale.getBuyer().getAge())
+                    .<Integer>map((Sale sale)->sale.getBuyer().getAge())
                     .into(new ArrayList<Integer>()));
             return null;
         }

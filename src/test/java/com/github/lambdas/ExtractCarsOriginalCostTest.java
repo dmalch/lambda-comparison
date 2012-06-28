@@ -99,8 +99,8 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final Iterable<Double> costs = db.getCars()
-                    .map((Car c)->c.getOriginalValue())
+            final List<Double> costs = db.getCars()
+                    .<Double>map((Car c)->c.getOriginalValue())
                     .into(new ArrayList<Double>());
             return null;
         }
