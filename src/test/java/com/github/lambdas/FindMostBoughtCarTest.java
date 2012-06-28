@@ -7,7 +7,9 @@ import ch.lambdaj.group.Group;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import static ch.lambdaj.Lambda.*;
 import static ch.lambdaj.group.Groups.by;
@@ -93,8 +95,7 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-
-            final Iterable<Sale> max = Collections.max(db.getSales().groupBy((Sale s)->s.getCar()).values().into(new ArrayList<Iterable<Sale>>()), comparator);
+            final Iterable<Sale> max = calcMax(db.getSales().groupBy((Sale s)->s.getCar()).values(), comparator);
 
             final Car mostBoughtCar = max.getFirst().getCar();
             final long boughtTimes = max.count();

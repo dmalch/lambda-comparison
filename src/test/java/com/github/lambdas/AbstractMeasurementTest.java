@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 
 import static java.text.MessageFormat.format;
 
@@ -40,5 +43,23 @@ public abstract class AbstractMeasurementTest {
         stopWatch.stop();
 
         return stopWatch.elapsedMillis();
+    }
+
+    protected <T extends Object & Comparable<? super T>> T calcMax(final Iterable<T> map) {
+        return Collections.max(new ArrayList<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return map.iterator();
+            }
+        });
+    }
+
+    protected <T> T calcMax(final Iterable<T> map, final Comparator<T> comparator) {
+        return Collections.max(new ArrayList<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return map.iterator();
+            }
+        }, comparator);
     }
 }
