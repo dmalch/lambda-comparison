@@ -17,6 +17,8 @@ public abstract class AbstractMeasurementTest {
     public static final int MEASUREMENTS_COUNT = 20;
 
     protected void performMeasurements(final Supplier<Void> functionToMeasure) {
+        logger.info(format("================<{0}>================", functionToMeasure.getClass().getSimpleName()));
+
         final ArrayList<Long> measurements = Lists.newArrayList();
 
         for (int i = 0; i < MEASUREMENTS_COUNT; i++) {
