@@ -25,9 +25,9 @@ public abstract class AbstractMeasurementTest {
             measurements.add(performMeasurement(functionToMeasure));
         }
 
-        logger.info(format("Min elapsed time: {0}", Lambda.min(measurements)));
-        logger.info(format("Max elapsed time: {0}", Lambda.max(measurements)));
-        logger.info(format("Avg elapsed time: {0}", Lambda.avg(measurements)));
+        logger.info(format("Min elapsed time: {0}", Lambda.<Long>min(measurements)));
+        logger.info(format("Max elapsed time: {0}", Lambda.<Long>max(measurements)));
+        logger.info(format("Avg elapsed time: {0}", Lambda.<Long>avg(measurements)));
     }
 
     private long performMeasurement(final Supplier<Void> toMeasure) {

@@ -29,6 +29,21 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testJDKLambda() throws Exception {
+        final Db db = Db.getInstance();
+        final ExtractCarsOriginalCostJDKLambda functionToMeasure = new ExtractCarsOriginalCostJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testJDKLambdaWithNewList() throws Exception {
+        final Db db = Db.getInstance();
+        final ExtractCarsOriginalCostJDKLambdaWithListCreation functionToMeasure = new ExtractCarsOriginalCostJDKLambdaWithListCreation(db);
+
+        performMeasurements(functionToMeasure);
+    }
 
     private class ExtractCarsOriginalCostIterable implements Supplier<Void> {
         private final Db db;
@@ -57,6 +72,36 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         @Override
         public Void get() {
             final List<Double> costs = extract(db.getCars(), on(Car.class).getOriginalValue());
+            return null;
+        }
+    }
+
+    private class ExtractCarsOriginalCostJDKLambda implements Supplier<Void> {
+        private final Db db;
+
+        public ExtractCarsOriginalCostJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Iterable<Double> costs = db.getCars().map((Car c)->c.getOriginalValue());
+            return null;
+        }
+    }
+
+    private class ExtractCarsOriginalCostJDKLambdaWithListCreation implements Supplier<Void> {
+        private final Db db;
+
+        public ExtractCarsOriginalCostJDKLambdaWithListCreation(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Iterable<Double> costs = db.getCars()
+                    .map((Car c)->c.getOriginalValue())
+                    .into(new ArrayList<Double>());
             return null;
         }
     }
