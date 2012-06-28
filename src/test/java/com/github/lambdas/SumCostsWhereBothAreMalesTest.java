@@ -22,7 +22,7 @@ public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
         final Db db = Db.getInstance();
         final SumCostsWhereBothAreMalesLambdaJ functionToMeasure = new SumCostsWhereBothAreMalesLambdaJ(db);
 
-//        performMeasurements(functionToMeasure);
+        performMeasurements(functionToMeasure);
     }
 
     @Test
@@ -78,8 +78,7 @@ public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
         public Void get() {
             final Double sum = db.getSales()
                     .filter((Sale s)->s.getBuyer().isMale() && s.getSeller().isMale())
-                    .<Double>map((Sale s)->s.getCost())
-                    .<Double>reduce(0.0, (Double d1, Double d2)->d1 + d2);
+                    .<Double>mapReduce((Sale s)->s.getCost(),0.0, (Double d1, Double d2)->d1 + d2);
             return null;
         }
     }

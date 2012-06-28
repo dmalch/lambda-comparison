@@ -73,6 +73,11 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
+            final StringBuilder sb = new StringBuilder();
+            db.getCars().forEach((Car c)->{
+                sb.append(c.getBrand()).append(", ");
+            });
+            final String brands = sb.toString().substring(0, sb.length() - 2);
             return null;
         }
     }
