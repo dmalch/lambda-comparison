@@ -12,7 +12,7 @@ public class Util {
 
     public static final DateFormat DEFAUALT_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 
-    public static Date formatDate(String date) {
+    public static Date formatDate(final String date) {
         try {
             return DEFAUALT_DATE_FORMAT.parse(date);
         } catch (ParseException e) {
@@ -25,13 +25,13 @@ public class Util {
         return getYear(new Date());
     }
 
-    public static int getYear(Date date) {
-        Calendar calendar = new GregorianCalendar();
+    public static int getYear(final Date date) {
+        final Calendar calendar = new GregorianCalendar();
         calendar.setTime(date);
         return calendar.get(Calendar.YEAR);
     }
 
-    public static boolean listsAreEqual(List<?> list1, List<?> list2) {
+    public static boolean listsAreEqual(final List<?> list1, final List<?> list2) {
         if (list1 == null && list2 == null) return true;
         if (list1 == null || list2 == null) return false;
         if (list1.size() != list2.size()) return false;

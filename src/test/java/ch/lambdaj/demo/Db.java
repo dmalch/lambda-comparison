@@ -6,9 +6,9 @@ import java.util.Random;
 
 public class Db {
 
-    public final List<Person> persons = new ArrayList<Person>();
-    public final List<Car> cars = new ArrayList<Car>();
-    public final List<Sale> sales = new ArrayList<Sale>();
+    public final List<Person> persons = new ArrayList<>();
+    public final List<Car> cars = new ArrayList<>();
+    public final List<Sale> sales = new ArrayList<>();
 
     private static final Db DB_INSTANCE = new Db();
 
@@ -69,13 +69,13 @@ public class Db {
     }
 
     private void createSales() {
-        Random random = new Random(System.currentTimeMillis());
+        final Random random = new Random(System.currentTimeMillis());
 
-        for (Person buyer : persons) {
-            for (Person seller : persons) {
+        for (final Person buyer : persons) {
+            for (final Person seller : persons) {
                 if (buyer.equals(seller)) continue;
-                Car car = cars.get(random.nextInt(cars.size()));
-                double cost = car.getOriginalValue() * random.nextDouble();
+                final Car car = cars.get(random.nextInt(cars.size()));
+                final double cost = car.getOriginalValue() * random.nextDouble();
                 sales.add(new Sale(seller, buyer, car, cost));
             }
         }

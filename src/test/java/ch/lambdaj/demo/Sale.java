@@ -10,7 +10,7 @@ public class Sale {
 
     protected Sale() { }
 
-    public Sale(Person seller, Person buyer, Car car, double cost) {
+    public Sale(final Person seller, final Person buyer, final Car car, final double cost) {
         this.seller = seller;
         this.buyer = buyer;
         this.car = car;
@@ -44,7 +44,7 @@ public class Sale {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (!Sale.class.isInstance(obj)) return false;
         return toString().equals(obj.toString());
     }
