@@ -7,6 +7,7 @@ import com.google.common.base.Supplier;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ch.lambdaj.Lambda.*;
@@ -30,6 +31,13 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testJDKLambda() throws Exception {
+        final Db db = Db.getInstance();
+        final FindBuysOfYoungestPersonJDKLambda functionToMeasure = new FindBuysOfYoungestPersonJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
 
     private class FindBuysOfYoungestPersonIterable implements Supplier<Void> {
         private final Db db;
@@ -46,7 +54,7 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
                     youngest = person;
                 }
             }
-            final List<Sale> buys = new ArrayList<Sale>();
+            final List<Sale> buys = new ArrayList<>();
             for (final Sale sale : db.getSales()) {
                 if (sale.getBuyer().equals(youngest)) {
                     buys.add(sale);
@@ -67,6 +75,23 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
         public Void get() {
             final List<Sale> sales = select(db.getSales(), having(on(Sale.class).getBuyer(),
                     equalTo(selectMin(db.getPersons(), on(Person.class).getAge()))));
+            return null;
+        }
+    }
+
+    private class FindBuysOfYoungestPersonJDKLambda implements Supplier<Void> {
+        private final Db db;
+
+        public FindBuysOfYoungestPersonJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Person min = Collections.min(db.getPersons(), (Person p1, Person p2)->p1.getAge() - p2.getAge());
+            final List<Sale> sales = db.getSales()
+                    .filter((Sale s)->s.getBuyer().equals(min))
+                    .into(new ArrayList<Sale>());
             return null;
         }
     }
