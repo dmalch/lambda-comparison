@@ -24,6 +24,14 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testJDKLambda() throws Exception {
+        final Db db = Db.getInstance();
+        final PrintAllBrandsJDKLambda functionToMeasure = new PrintAllBrandsJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
     private class PrintAllBrandsIterable implements Supplier<Void> {
         private final Db db;
 
@@ -52,6 +60,19 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
         @Override
         public Void get() {
             final String brands = Lambda.joinFrom(db.getCars()).getBrand();
+            return null;
+        }
+    }
+
+    private class PrintAllBrandsJDKLambda implements Supplier<Void> {
+        private final Db db;
+
+        public PrintAllBrandsJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
             return null;
         }
     }

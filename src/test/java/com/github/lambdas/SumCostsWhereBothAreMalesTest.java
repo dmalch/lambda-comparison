@@ -22,9 +22,16 @@ public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
         final Db db = Db.getInstance();
         final SumCostsWhereBothAreMalesLambdaJ functionToMeasure = new SumCostsWhereBothAreMalesLambdaJ(db);
 
-        performMeasurements(functionToMeasure);
+//        performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testJDKLambda() throws Exception {
+        final Db db = Db.getInstance();
+        final SumCostsWhereBothAreMalesJDKLambda functionToMeasure = new SumCostsWhereBothAreMalesJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
 
     private class SumCostsWhereBothAreMalesIterable implements Supplier<Void> {
         private final Db db;
@@ -56,6 +63,23 @@ public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
             final double sum = sumFrom(select(db.getSales(),
                     having(on(Sale.class).getBuyer().isMale())
                             .and(having(on(Sale.class).getSeller().isMale())))).getCost();
+            return null;
+        }
+    }
+
+    private class SumCostsWhereBothAreMalesJDKLambda implements Supplier<Void> {
+        private final Db db;
+
+        public SumCostsWhereBothAreMalesJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Double sum = db.getSales()
+                    .filter((Sale s)->s.getBuyer().isMale() && s.getSeller().isMale())
+                    .<Double>map((Sale s)->s.getCost())
+                    .<Double>reduce(0.0, (Double d1, Double d2)->d1 + d2);
             return null;
         }
     }

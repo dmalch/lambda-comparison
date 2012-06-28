@@ -30,6 +30,13 @@ public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testJDKLambda() throws Exception {
+        final Db db = Db.getInstance();
+        final GroupSalesByBuyersAndSellersJDKLambda functionToMeasure = new GroupSalesByBuyersAndSellersJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
 
     private class GroupSalesByBuyersAndSellersIterable implements Supplier<Void> {
         private final Db db;
@@ -40,12 +47,12 @@ public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final Map<Person, Map<Person, Sale>> map = new HashMap<Person, Map<Person, Sale>>();
+            final Map<Person, Map<Person, Sale>> map = new HashMap<>();
             for (final Sale sale : db.getSales()) {
                 final Person buyer = sale.getBuyer();
                 Map<Person, Sale> buyerMap = map.get(buyer);
                 if (buyerMap == null) {
-                    buyerMap = new HashMap<Person, Sale>();
+                    buyerMap = new HashMap<>();
                     map.put(buyer, buyerMap);
                 }
                 buyerMap.put(sale.getSeller(), sale);
@@ -53,10 +60,12 @@ public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
             Person youngest = null;
             Person oldest = null;
             for (final Person person : db.getPersons()) {
-                if (youngest == null || person.getAge() < youngest.getAge())
+                if (youngest == null || person.getAge() < youngest.getAge()) {
                     youngest = person;
-                if (oldest == null || person.getAge() > oldest.getAge())
+                }
+                if (oldest == null || person.getAge() > oldest.getAge()) {
                     oldest = person;
+                }
             }
             final Sale saleFromYoungestToOldest = map.get(youngest).get(oldest);
             return null;
@@ -76,6 +85,28 @@ public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
             final Person youngest = selectMin(db.getPersons(), on(Person.class).getAge());
             final Person oldest = selectMax(db.getPersons(), on(Person.class).getAge());
             final Sale sale = group.findGroup(youngest).find(oldest).get(0);
+            return null;
+        }
+    }
+
+    private class GroupSalesByBuyersAndSellersJDKLambda implements Supplier<Void> {
+        private final Db db;
+
+        public GroupSalesByBuyersAndSellersJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+//            final Group<Sale> group = group(db.getSales(), by(on(Sale.class).getBuyer()), by(on(Sale.class).getSeller()));
+//            final Person youngest = selectMin(db.getPersons(), on(Person.class).getAge());
+//            final Person oldest = selectMax(db.getPersons(), on(Person.class).getAge());
+//            final Sale sale = group.findGroup(youngest).find(oldest).get(0);
+
+
+//            final MapStream<Person, Iterable<Sale>> objectIterableMapStream = db.getSales()
+//                    .groupBy((Sale s)->s.getSeller())
+//                    .
             return null;
         }
     }

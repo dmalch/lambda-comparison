@@ -31,6 +31,13 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testJDKLambda() throws Exception {
+        final Db db = Db.getInstance();
+        final SelectAllSalesOfFerrariJDKLambda functionToMeasure = new SelectAllSalesOfFerrariJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
 
     private class SelectAllSalesOfFerrariIterable implements Supplier<Void> {
         private final Db db;
@@ -61,6 +68,20 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         public Void get() {
             final List<Sale> salesOfAFerrari = Lambda.select(db.getSales(),
                     having(on(Sale.class).getCar().getBrand(), equalTo("Ferrari")));
+            return null;
+        }
+    }
+
+    private class SelectAllSalesOfFerrariJDKLambda implements Supplier<Void> {
+        private final Db db;
+
+        public SelectAllSalesOfFerrariJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final List<Sale> salesOfAFerrari = db.getSales().filter((Sale s)->s.getCar().getBrand().equals("Ferrari")).into(new ArrayList<Sale>());
             return null;
         }
     }

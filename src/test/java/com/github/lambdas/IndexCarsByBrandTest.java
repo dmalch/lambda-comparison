@@ -29,6 +29,13 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testJDKLambda() throws Exception {
+        final Db db = Db.getInstance();
+        final IndexCarsByBrandJDKLambda functionToMeasure = new IndexCarsByBrandJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
 
     private class IndexCarsByBrandIterable implements Supplier<Void> {
         private final Db db;
@@ -57,6 +64,20 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         @Override
         public Void get() {
             final Map<String, Car> carsByBrand = index(db.getCars(), on(Car.class).getBrand());
+            return null;
+        }
+    }
+
+    private class IndexCarsByBrandJDKLambda implements Supplier<Void> {
+        private final Db db;
+
+        public IndexCarsByBrandJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Map<String, Car> carsByBrand = db.getCars().<String>mapped((Car c)->c.getBrand()).swap().into(new HashMap<String, Car>());
             return null;
         }
     }
