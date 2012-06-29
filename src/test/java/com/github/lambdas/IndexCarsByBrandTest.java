@@ -4,7 +4,8 @@ import ch.lambdaj.demo.Car;
 import ch.lambdaj.demo.Db;
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.Multimaps;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import java.util.Map;
 
 import static ch.lambdaj.Lambda.index;
 import static ch.lambdaj.Lambda.on;
-import static com.google.common.collect.Maps.uniqueIndex;
 
 public class IndexCarsByBrandTest extends AbstractMeasurementTest {
 
@@ -102,7 +102,7 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final ImmutableMap<String, Car> carsByBrand = uniqueIndex(db.getCars(), new Function<Car, String>() {
+            final ImmutableListMultimap<String, Car> carsByBrand = Multimaps.index(db.getCars(), new Function<Car, String>() {
                 @Override
                 public String apply(final Car input) {
                     return input.getBrand();
