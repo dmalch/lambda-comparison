@@ -34,6 +34,14 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final FindMostCostlySaleGuava functionToMeasure = new FindMostCostlySaleGuava(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
     private class FindMostCostlySaleIterable implements Supplier<Void> {
         private final Db db;
 
@@ -70,6 +78,20 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
         private final Db db;
 
         public FindMostCostlySaleJDKLambda(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Double maxCost = calcMax(db.getSales().<Double>map((Sale s)->s.getCost()));
+            return null;
+        }
+    }
+
+    private class FindMostCostlySaleGuava implements Supplier<Void> {
+        private final Db db;
+
+        public FindMostCostlySaleGuava(final Db db) {
             this.db = db;
         }
 

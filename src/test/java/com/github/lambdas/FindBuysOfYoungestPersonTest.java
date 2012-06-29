@@ -3,14 +3,18 @@ package com.github.lambdas;
 import ch.lambdaj.demo.Db;
 import ch.lambdaj.demo.Person;
 import ch.lambdaj.demo.Sale;
+import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static ch.lambdaj.Lambda.*;
+import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.min;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
@@ -35,6 +39,14 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
     public void testJDKLambda() throws Exception {
         final Db db = Db.getInstance();
         final FindBuysOfYoungestPersonJDKLambda functionToMeasure = new FindBuysOfYoungestPersonJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final FindBuysOfYoungestPersonGuava functionToMeasure = new FindBuysOfYoungestPersonGuava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -88,10 +100,36 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final Person min = Collections.min(db.getPersons(), (Person p1, Person p2)->p1.getAge() - p2.getAge());
+            final Person min = min(db.getPersons(), (Person p1, Person p2)->Integer.compare(p1.getAge(), p2.getAge()));
             final List<Sale> sales = db.getSales()
                     .filter((Sale s)->s.getBuyer().equals(min))
                     .into(new ArrayList<Sale>());
+            return null;
+        }
+    }
+
+    private class FindBuysOfYoungestPersonGuava implements Supplier<Void> {
+        private final Db db;
+
+        public FindBuysOfYoungestPersonGuava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Person min = min(db.getPersons(), new Comparator<Person>() {
+                @Override
+                public int compare(final Person o1, final Person o2) {
+                    return Integer.compare(o1.getAge(), o2.getAge());
+                }
+            });
+            final List<Sale> sales = newArrayList(filter(db.getSales(), new Predicate<Sale>() {
+                @Override
+                public boolean apply(final Sale input) {
+                    return input.getBuyer().equals(min);
+                }
+            }));
+
             return null;
         }
     }

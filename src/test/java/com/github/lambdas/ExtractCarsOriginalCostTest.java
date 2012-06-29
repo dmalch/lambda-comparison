@@ -2,7 +2,9 @@ package com.github.lambdas;
 
 import ch.lambdaj.demo.Car;
 import ch.lambdaj.demo.Db;
+import com.google.common.base.Function;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.List;
 
 import static ch.lambdaj.Lambda.extract;
 import static ch.lambdaj.Lambda.on;
+import static com.google.common.collect.Lists.transform;
 
 public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
 
@@ -41,6 +44,14 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
     public void testJDKLambdaWithNewList() throws Exception {
         final Db db = Db.getInstance();
         final ExtractCarsOriginalCostJDKLambdaWithListCreation functionToMeasure = new ExtractCarsOriginalCostJDKLambdaWithListCreation(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final ExtractCarsOriginalCostGuava functionToMeasure = new ExtractCarsOriginalCostGuava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -102,6 +113,26 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
             final List<Double> costs = db.getCars()
                     .<Double>map((Car c)->c.getOriginalValue())
                     .into(new ArrayList<Double>());
+            return null;
+        }
+    }
+
+    private class ExtractCarsOriginalCostGuava implements Supplier<Void> {
+        private final Db db;
+
+        public ExtractCarsOriginalCostGuava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final List<Double> costs = transform(db.getCars(), new Function<Car, Double>() {
+                @Override
+                public Double apply(final Car input) {
+                    return input.getOriginalValue();
+                }
+            });
+
             return null;
         }
     }

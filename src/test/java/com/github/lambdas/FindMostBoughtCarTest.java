@@ -4,13 +4,21 @@ import ch.lambdaj.demo.Car;
 import ch.lambdaj.demo.Db;
 import ch.lambdaj.demo.Sale;
 import ch.lambdaj.group.Group;
+import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import static ch.lambdaj.Lambda.*;
 import static ch.lambdaj.group.Groups.by;
+import static com.google.common.collect.Iterables.getFirst;
+import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Multimaps.index;
+import static java.util.Collections.max;
 
 public class FindMostBoughtCarTest extends AbstractMeasurementTest {
 
@@ -34,6 +42,14 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
     public void testJDKLambda() throws Exception {
         final Db db = Db.getInstance();
         final FindMostBoughtCarJDKLambda functionToMeasure = new FindMostBoughtCarJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final FindMostBoughtCarGuava functionToMeasure = new FindMostBoughtCarGuava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -85,7 +101,6 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
 
     private class FindMostBoughtCarJDKLambda implements Supplier<Void> {
         private final Db db;
-        private final Comparator<Iterable<Sale>> comparator = (final Iterable<Sale> o1, final Iterable<Sale> o2)->(int) (o1.count() - o2.count());
 
         public FindMostBoughtCarJDKLambda(final Db db) {
             this.db = db;
@@ -93,10 +108,38 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final Iterable<Sale> max = calcMax(db.getSales().groupBy((Sale s)->s.getCar()).values(), comparator);
+            final Iterable<Sale> max = calcMax(db.getSales().groupBy((Sale s)->s.getCar()).values(),
+                    (final Iterable<Sale> o1, final Iterable<Sale> o2)->Long.compare(o1.count(), o2.count()));
 
             final Car mostBoughtCar = max.getFirst().getCar();
             final long boughtTimes = max.count();
+
+            return null;
+        }
+    }
+
+    private class FindMostBoughtCarGuava implements Supplier<Void> {
+        private final Db db;
+
+        public FindMostBoughtCarGuava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Collection<Sale> max = max(index(db.getSales(), new Function<Sale, Car>() {
+                @Override
+                public Car apply(final Sale input) {
+                    return input.getCar();
+                }
+            }).asMap().values(), new Comparator<Collection<Sale>>() {
+                @Override
+                public int compare(final Collection<Sale> o1, final Collection<Sale> o2) {
+                    return Long.compare(size(o1), size(o2));
+                }
+            });
+            final Car mostBoughtCar = getFirst(max, null).getCar();
+            final long boughtTimes = max.size();
 
             return null;
         }

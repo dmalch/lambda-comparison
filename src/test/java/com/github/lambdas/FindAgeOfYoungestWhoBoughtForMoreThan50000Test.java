@@ -1,15 +1,20 @@
 package com.github.lambdas;
 
+import ch.lambdaj.Lambda;
 import ch.lambdaj.demo.Db;
 import ch.lambdaj.demo.Person;
 import ch.lambdaj.demo.Sale;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import static ch.lambdaj.Lambda.*;
+import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Collections2.transform;
+import static java.util.Collections.min;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 
 public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeasurementTest {
@@ -34,6 +39,14 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
     public void testJDKLambda() throws Exception {
         final Db db = Db.getInstance();
         final FindAgeOfYoungestWhoBoughtForMoreThan50000JDKLambda functionToMeasure = new FindAgeOfYoungestWhoBoughtForMoreThan50000JDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final FindAgeOfYoungestWhoBoughtForMoreThan50000Guava functionToMeasure = new FindAgeOfYoungestWhoBoughtForMoreThan50000Guava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -69,7 +82,7 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
 
         @Override
         public Void get() {
-            final int age = min(forEach(select(db.getSales(), having(on(Sale.class).getCost(),
+            final int age = Lambda.min(forEach(select(db.getSales(), having(on(Sale.class).getCost(),
                     greaterThan(50000.00)))).getBuyer(), on(Person.class).getAge());
             return null;
         }
@@ -84,10 +97,34 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
 
         @Override
         public Void get() {
-            final int age = Collections.min(db.getSales()
+            final int age = min(db.getSales()
                     .filter((Sale sale)->sale.getCost() > 50000.00)
                     .<Integer>map((Sale sale)->sale.getBuyer().getAge())
                     .into(new ArrayList<Integer>()));
+            return null;
+        }
+    }
+
+    private class FindAgeOfYoungestWhoBoughtForMoreThan50000Guava implements Supplier<Void> {
+        private final Db db;
+
+        public FindAgeOfYoungestWhoBoughtForMoreThan50000Guava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final int age = min(transform(filter(db.getSales(), new Predicate<Sale>() {
+                @Override
+                public boolean apply(final Sale input) {
+                    return input.getCost() > 50000.00;
+                }
+            }), new Function<Sale, Integer>() {
+                @Override
+                public Integer apply(final Sale input) {
+                    return input.getBuyer().getAge();
+                }
+            }));
             return null;
         }
     }
