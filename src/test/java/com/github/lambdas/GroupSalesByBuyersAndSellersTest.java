@@ -4,13 +4,23 @@ import ch.lambdaj.demo.Db;
 import ch.lambdaj.demo.Person;
 import ch.lambdaj.demo.Sale;
 import ch.lambdaj.group.Group;
+import com.google.common.base.Function;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import static ch.lambdaj.Lambda.*;
+import static com.google.common.collect.Maps.uniqueIndex;
+import static com.google.common.collect.Multimaps.index;
+import static java.util.Collections.max;
+import static java.util.Collections.min;
 
 public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
 
@@ -34,6 +44,14 @@ public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
     public void testJDKLambda() throws Exception {
         final Db db = Db.getInstance();
         final GroupSalesByBuyersAndSellersJDKLambda functionToMeasure = new GroupSalesByBuyersAndSellersJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final GroupSalesByBuyersAndSellersGuava functionToMeasure = new GroupSalesByBuyersAndSellersGuava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -112,6 +130,57 @@ public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
             final Person oldest = calcMax(mapped, (BiValue<Person, Integer> b1, BiValue<Person, Integer> b2)->Integer.compare(b1.getValue(), b2.getValue())).getKey();
 
             final Sale sale = buyerToSellerToSale.get(youngest).get(oldest).getFirst();
+            return null;
+        }
+    }
+
+    private class GroupSalesByBuyersAndSellersGuava implements Supplier<Void> {
+        private final Db db;
+
+        public GroupSalesByBuyersAndSellersGuava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final ImmutableMap<Person, Collection<Sale>> buyerToSale = index(db.getSales(), new Function<Sale, Person>() {
+                @Override
+                public Person apply(final Sale input) {
+                    return input.getBuyer();
+                }
+            }).asMap();
+            final Map<Person, Map<Person, Collection<Sale>>> buyerToSellerToSale = Maps.transformValues(buyerToSale, new Function<Collection<Sale>, Map<Person, Collection<Sale>>>() {
+                @Override
+                public Map<Person, Collection<Sale>> apply(final Collection<Sale> input) {
+                    return index(input, new Function<Sale, Person>() {
+                        @Override
+                        public Person apply(final Sale input) {
+                            return input.getSeller();
+                        }
+                    }).asMap();
+                }
+            });
+
+            final ImmutableMap<Integer, Person> mapped = uniqueIndex(db.getPersons(), new Function<Person, Integer>() {
+                @Override
+                public Integer apply(final Person input) {
+                    return input.getAge();
+                }
+            });
+            final Person youngest = min(mapped.entrySet(), new Comparator<Map.Entry<Integer, Person>>() {
+                @Override
+                public int compare(final Map.Entry<Integer, Person> o1, final Map.Entry<Integer, Person> o2) {
+                    return Integer.compare(o1.getKey(), o2.getKey());
+                }
+            }).getValue();
+            final Person oldest = max(mapped.entrySet(), new Comparator<Map.Entry<Integer, Person>>() {
+                @Override
+                public int compare(final Map.Entry<Integer, Person> o1, final Map.Entry<Integer, Person> o2) {
+                    return Integer.compare(o1.getKey(), o2.getKey());
+                }
+            }).getValue();
+
+            final Sale sale = Iterables.getFirst(buyerToSellerToSale.get(youngest).get(oldest), null);
             return null;
         }
     }
