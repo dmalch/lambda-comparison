@@ -44,8 +44,9 @@ public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
         public Void get() {
             double sum = 0.0;
             for (final Sale sale : db.getSales()) {
-                if (sale.getBuyer().isMale() && sale.getSeller().isMale())
+                if (sale.getBuyer().isMale() && sale.getSeller().isMale()) {
                     sum += sale.getCost();
+                }
             }
             return null;
         }

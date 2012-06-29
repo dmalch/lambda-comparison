@@ -17,7 +17,7 @@ import static java.text.MessageFormat.format;
 public abstract class AbstractMeasurementTest {
     private static final transient Logger logger = LoggerFactory.getLogger(PrintAllBrandsTest.class);
     public static final int ITERATIONS_COUNT = 100000;
-    public static final int MEASUREMENTS_COUNT = 20;
+    public static final int MEASUREMENTS_COUNT = 100;
 
     protected void performMeasurements(final Supplier<Void> functionToMeasure) {
         logger.info(format("================<{0}>================", functionToMeasure.getClass().getSimpleName()));
@@ -56,6 +56,24 @@ public abstract class AbstractMeasurementTest {
 
     protected <T> T calcMax(final Iterable<T> map, final Comparator<T> comparator) {
         return Collections.max(new ArrayList<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return map.iterator();
+            }
+        }, comparator);
+    }
+
+    protected <T extends Object & Comparable<? super T>> T calcMin(final Iterable<T> map) {
+        return Collections.min(new ArrayList<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return map.iterator();
+            }
+        });
+    }
+
+    protected <T> T calcMin(final Iterable<T> map, final Comparator<T> comparator) {
+        return Collections.min(new ArrayList<T>() {
             @Override
             public Iterator<T> iterator() {
                 return map.iterator();

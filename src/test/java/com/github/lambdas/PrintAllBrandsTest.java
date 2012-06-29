@@ -6,6 +6,8 @@ import ch.lambdaj.demo.Db;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
+import java.util.StringJoiner;
+
 public class PrintAllBrandsTest extends AbstractMeasurementTest {
 
     @Test
@@ -73,11 +75,8 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final StringBuilder sb = new StringBuilder();
-            db.getCars().forEach((Car c)->{
-                sb.append(c.getBrand()).append(", ");
-            });
-            final String brands = sb.toString().substring(0, sb.length() - 2);
+            final StringJoiner stringJoiner = db.getCars().<String>map((Car c)->c.getBrand()).into(new StringJoiner(","));
+            final String brands = stringJoiner.toString();
             return null;
         }
     }

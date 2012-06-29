@@ -98,15 +98,20 @@ public class GroupSalesByBuyersAndSellersTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-//            final Group<Sale> group = group(db.getSales(), by(on(Sale.class).getBuyer()), by(on(Sale.class).getSeller()));
-//            final Person youngest = selectMin(db.getPersons(), on(Person.class).getAge());
-//            final Person oldest = selectMax(db.getPersons(), on(Person.class).getAge());
-//            final Sale sale = group.findGroup(youngest).find(oldest).get(0);
 
+            final Map<Person, Iterable<Sale>> buyerToSale =
+                    db.getSales()
+                            .<Person>groupBy((Sale s)->s.getBuyer()).into(new HashMap<Person, Iterable<Sale>>());
 
-//            final MapStream<Person, Iterable<Sale>> objectIterableMapStream = db.getSales()
-//                    .groupBy((Sale s)->s.getSeller())
-//                    .
+            final Map<Person, Map<Person, Iterable<Sale>>> buyerToSellerToSale = buyerToSale
+                    .<Map<Person, Iterable<Sale>>>mapValues((Iterable<Sale> s)->s.<Person>groupBy((Sale sale)->sale.getSeller()).into(new HashMap<Person, Iterable<Sale>>()))
+                    .into(new HashMap<Person, Map<Person, Iterable<Sale>>>());
+
+            final Iterable<BiValue<Person, Integer>> mapped = db.getPersons().<Integer>mapped((Person p)->p.getAge()).asIterable();
+            final Person youngest = calcMin(mapped, (BiValue<Person, Integer> b1, BiValue<Person, Integer> b2)->Integer.compare(b1.getValue(), b2.getValue())).getKey();
+            final Person oldest = calcMax(mapped, (BiValue<Person, Integer> b1, BiValue<Person, Integer> b2)->Integer.compare(b1.getValue(), b2.getValue())).getKey();
+
+            final Sale sale = buyerToSellerToSale.get(youngest).get(oldest).getFirst();
             return null;
         }
     }

@@ -7,9 +7,7 @@ import ch.lambdaj.group.Group;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static ch.lambdaj.Lambda.*;
 import static ch.lambdaj.group.Groups.by;
