@@ -2,10 +2,16 @@ package com.github.lambdas;
 
 import ch.lambdaj.demo.Db;
 import ch.lambdaj.demo.Sale;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
+import java.util.Collection;
+
 import static ch.lambdaj.Lambda.*;
+import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Collections2.transform;
 
 public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
 
@@ -29,6 +35,14 @@ public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
     public void testJDKLambda() throws Exception {
         final Db db = Db.getInstance();
         final SumCostsWhereBothAreMalesJDKLambda functionToMeasure = new SumCostsWhereBothAreMalesJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final SumCostsWhereBothAreMalesGuava functionToMeasure = new SumCostsWhereBothAreMalesGuava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -79,7 +93,37 @@ public class SumCostsWhereBothAreMalesTest extends AbstractMeasurementTest {
         public Void get() {
             final Double sum = db.getSales()
                     .filter((Sale s)->s.getBuyer().isMale() && s.getSeller().isMale())
-                    .<Double>mapReduce((Sale s)->s.getCost(),0.0, (Double d1, Double d2)->d1 + d2);
+                    .<Double>mapReduce((Sale s)->s.getCost(), 0.0, (Double d1, Double d2)->d1 + d2);
+            return null;
+        }
+    }
+
+    private class SumCostsWhereBothAreMalesGuava implements Supplier<Void> {
+        private final Db db;
+
+        public SumCostsWhereBothAreMalesGuava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+
+            final Collection<Double> transform = transform(filter(db.getSales(), new Predicate<Sale>() {
+                @Override
+                public boolean apply(final Sale input) {
+                    return input.getBuyer().isMale() && input.getSeller().isMale();
+                }
+            }), new Function<Sale, Double>() {
+                @Override
+                public Double apply(final Sale input) {
+                    return input.getCost();
+                }
+            });
+
+            Double sum = 0.0;
+            for (final Double aDouble : transform) {
+                sum += aDouble;
+            }
             return null;
         }
     }

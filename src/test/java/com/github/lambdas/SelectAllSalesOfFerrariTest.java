@@ -3,14 +3,17 @@ package com.github.lambdas;
 import ch.lambdaj.Lambda;
 import ch.lambdaj.demo.Db;
 import ch.lambdaj.demo.Sale;
+import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
+import static com.google.common.collect.Collections2.filter;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
@@ -35,6 +38,14 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
     public void testJDKLambda() throws Exception {
         final Db db = Db.getInstance();
         final SelectAllSalesOfFerrariJDKLambda functionToMeasure = new SelectAllSalesOfFerrariJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final SelectAllSalesOfFerrariGuava functionToMeasure = new SelectAllSalesOfFerrariGuava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -82,6 +93,25 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         @Override
         public Void get() {
             final List<Sale> salesOfAFerrari = db.getSales().filter((Sale s)->s.getCar().getBrand().equals("Ferrari")).into(new ArrayList<Sale>());
+            return null;
+        }
+    }
+
+    private class SelectAllSalesOfFerrariGuava implements Supplier<Void> {
+        private final Db db;
+
+        public SelectAllSalesOfFerrariGuava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final Collection<Sale> salesOfAFerrari = filter(db.getSales(), new Predicate<Sale>() {
+                @Override
+                public boolean apply(final Sale input) {
+                    return input.getCar().getBrand().equals("Ferrari");
+                }
+            });
             return null;
         }
     }

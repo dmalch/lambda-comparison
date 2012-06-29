@@ -2,7 +2,9 @@ package com.github.lambdas;
 
 import ch.lambdaj.demo.Car;
 import ch.lambdaj.demo.Db;
+import com.google.common.base.Function;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 import static ch.lambdaj.Lambda.index;
 import static ch.lambdaj.Lambda.on;
+import static com.google.common.collect.Maps.uniqueIndex;
 
 public class IndexCarsByBrandTest extends AbstractMeasurementTest {
 
@@ -33,6 +36,14 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
     public void testJDKLambda() throws Exception {
         final Db db = Db.getInstance();
         final IndexCarsByBrandJDKLambda functionToMeasure = new IndexCarsByBrandJDKLambda(db);
+
+        performMeasurements(functionToMeasure);
+    }
+
+    @Test
+    public void testGuava() throws Exception {
+        final Db db = Db.getInstance();
+        final IndexCarsByBrandGuava functionToMeasure = new IndexCarsByBrandGuava(db);
 
         performMeasurements(functionToMeasure);
     }
@@ -78,6 +89,25 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         @Override
         public Void get() {
             final Map<String, Car> carsByBrand = db.getCars().<String>mapped((Car c)->c.getBrand()).swap().into(new HashMap<String, Car>());
+            return null;
+        }
+    }
+
+    private class IndexCarsByBrandGuava implements Supplier<Void> {
+        private final Db db;
+
+        public IndexCarsByBrandGuava(final Db db) {
+            this.db = db;
+        }
+
+        @Override
+        public Void get() {
+            final ImmutableMap<String, Car> carsByBrand = uniqueIndex(db.getCars(), new Function<Car, String>() {
+                @Override
+                public String apply(final Car input) {
+                    return input.getBrand();
+                }
+            });
             return null;
         }
     }
