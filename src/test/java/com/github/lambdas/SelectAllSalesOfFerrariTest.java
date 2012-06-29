@@ -8,12 +8,12 @@ import com.google.common.base.Supplier;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static ch.lambdaj.Lambda.having;
 import static ch.lambdaj.Lambda.on;
 import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
@@ -106,12 +106,12 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final Collection<Sale> salesOfAFerrari = filter(db.getSales(), new Predicate<Sale>() {
+            final List<Sale> salesOfAFerrari = newArrayList(filter(db.getSales(), new Predicate<Sale>() {
                 @Override
                 public boolean apply(final Sale input) {
                     return input.getCar().getBrand().equals("Ferrari");
                 }
-            });
+            }));
             return null;
         }
     }
