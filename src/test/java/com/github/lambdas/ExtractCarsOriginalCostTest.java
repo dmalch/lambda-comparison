@@ -126,12 +126,12 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
 
         @Override
         public Void get() {
-            final List<Double> costs = transform(db.getCars(), new Function<Car, Double>() {
+            final List<Double> costs = Lists.newArrayList(transform(db.getCars(), new Function<Car, Double>() {
                 @Override
                 public Double apply(final Car input) {
                     return input.getOriginalValue();
                 }
-            });
+            }));
 
             return null;
         }
