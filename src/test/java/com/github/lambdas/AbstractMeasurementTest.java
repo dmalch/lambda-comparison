@@ -61,12 +61,17 @@ public abstract class AbstractMeasurementTest {
         return measurements;
     }
 
+    private Object result;
+
     private long performMeasurement(final Supplier toMeasure) {
 
         final Stopwatch stopWatch = new Stopwatch();
         stopWatch.start();
         for (int i = 0; i < ITERATIONS_COUNT; i++) {
-            toMeasure.get();
+            // This is a desperate attempt to prevent dead-code elimination in get().
+            // However, this is not enough for compiler to unroll the loop, and store the last result only.
+            // FIXME: This should be done cleaner.
+            result = toMeasure.get();
         }
         stopWatch.stop();
 
