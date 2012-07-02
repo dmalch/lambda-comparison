@@ -46,7 +46,7 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
-    private class FindMostCostlySaleIterable implements Supplier<Void> {
+    private class FindMostCostlySaleIterable implements Supplier<Double> {
         private final Db db;
 
         public FindMostCostlySaleIterable(final Db db) {
@@ -54,17 +54,17 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Double get() {
             double maxCost = 0.0;
             for (final Sale sale : db.getSales()) {
                 final double cost = sale.getCost();
                 if (cost > maxCost) maxCost = cost;
             }
-            return null;
+            return maxCost;
         }
     }
 
-    private class FindMostCostlySaleLambdaJ implements Supplier<Void> {
+    private class FindMostCostlySaleLambdaJ implements Supplier<Double> {
         private final Db db;
 
         public FindMostCostlySaleLambdaJ(final Db db) {
@@ -72,13 +72,13 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Double get() {
             final double maxCost = max(db.getSales(), on(Sale.class).getCost());
-            return null;
+            return maxCost;
         }
     }
 
-    private class FindMostCostlySaleJDKLambda implements Supplier<Void> {
+    private class FindMostCostlySaleJDKLambda implements Supplier<Double> {
         private final Db db;
 
         public FindMostCostlySaleJDKLambda(final Db db) {
@@ -86,13 +86,13 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Double get() {
             final Double maxCost = calcMax(db.getSales().<Double>map((Sale s)->s.getCost()));
-            return null;
+            return maxCost;
         }
     }
 
-    private class FindMostCostlySaleGuava implements Supplier<Void> {
+    private class FindMostCostlySaleGuava implements Supplier<Double> {
         private final Db db;
 
         public FindMostCostlySaleGuava(final Db db) {
@@ -100,7 +100,7 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Double get() {
             final Double maxCost = Collections.max(transform(db.getSales(), new Function<Sale, Double>() {
                 @Override
                 public Double apply(final Sale input) {
@@ -108,7 +108,7 @@ public class FindMostCostlySaleTest extends AbstractMeasurementTest {
                 }
             }));
 
-            return null;
+            return maxCost;
         }
     }
 }

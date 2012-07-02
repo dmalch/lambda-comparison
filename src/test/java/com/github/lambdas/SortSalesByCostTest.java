@@ -48,7 +48,7 @@ public class SortSalesByCostTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
-    private class SortSalesByCostIterable implements Supplier<Void> {
+    private class SortSalesByCostIterable implements Supplier<List<Sale>> {
         private final Db db;
 
         public SortSalesByCostIterable(final Db db) {
@@ -56,18 +56,18 @@ public class SortSalesByCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> sortedSales = new ArrayList<Sale>(db.getSales());
             Collections.sort(sortedSales, new Comparator<Sale>() {
                 public int compare(final Sale s1, final Sale s2) {
                     return Double.valueOf(s1.getCost()).compareTo(s2.getCost());
                 }
             });
-            return null;
+            return sortedSales;
         }
     }
 
-    private class SortSalesByCostLambdaJ implements Supplier<Void> {
+    private class SortSalesByCostLambdaJ implements Supplier<List<Sale>> {
         private final Db db;
 
         public SortSalesByCostLambdaJ(final Db db) {
@@ -75,13 +75,13 @@ public class SortSalesByCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> sortedSales = sort(db.getSales(), on(Sale.class).getCost());
-            return null;
+            return sortedSales;
         }
     }
 
-    private class SortSalesByCostJDKLambda implements Supplier<Void> {
+    private class SortSalesByCostJDKLambda implements Supplier<List<Sale>> {
         private final Db db;
 
         public SortSalesByCostJDKLambda(final Db db) {
@@ -89,13 +89,13 @@ public class SortSalesByCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> sortedSales = db.getSales().sorted((Sale s1, Sale s2)->Double.compare(s1.getCost(), s2.getCost())).into(new ArrayList<Sale>());
-            return null;
+            return sortedSales;
         }
     }
 
-    private class SortSalesByCostGuava implements Supplier<Void> {
+    private class SortSalesByCostGuava implements Supplier<List<Sale>> {
         private final Db db;
 
         public SortSalesByCostGuava(final Db db) {
@@ -103,14 +103,14 @@ public class SortSalesByCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> sortedSales = from(new Comparator<Sale>() {
                 @Override
                 public int compare(final Sale o1, final Sale o2) {
                     return Double.compare(o1.getCost(), o2.getCost());
                 }
             }).sortedCopy(db.getSales());
-            return null;
+            return sortedSales;
         }
     }
 }

@@ -48,7 +48,7 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
-    private class IndexCarsByBrandIterable implements Supplier<Void> {
+    private class IndexCarsByBrandIterable implements Supplier<Map<String, Car>> {
         private final Db db;
 
         public IndexCarsByBrandIterable(final Db db) {
@@ -56,16 +56,16 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Map<String, Car> get() {
             final Map<String, Car> carsByBrand = new HashMap<String, Car>();
             for (final Car car : db.getCars()) {
                 carsByBrand.put(car.getBrand(), car);
             }
-            return null;
+            return carsByBrand;
         }
     }
 
-    private class IndexCarsByBrandLambdaJ implements Supplier<Void> {
+    private class IndexCarsByBrandLambdaJ implements Supplier<Map<String, Car>> {
         private final Db db;
 
         public IndexCarsByBrandLambdaJ(final Db db) {
@@ -73,13 +73,13 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Map<String, Car> get() {
             final Map<String, Car> carsByBrand = index(db.getCars(), on(Car.class).getBrand());
-            return null;
+            return carsByBrand;
         }
     }
 
-    private class IndexCarsByBrandJDKLambda implements Supplier<Void> {
+    private class IndexCarsByBrandJDKLambda implements Supplier<Map<String, Car>> {
         private final Db db;
 
         public IndexCarsByBrandJDKLambda(final Db db) {
@@ -87,13 +87,13 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Map<String, Car> get() {
             final Map<String, Car> carsByBrand = db.getCars().<String>mapped((Car c)->c.getBrand()).swap().into(new HashMap<String, Car>());
-            return null;
+            return carsByBrand;
         }
     }
 
-    private class IndexCarsByBrandGuava implements Supplier<Void> {
+    private class IndexCarsByBrandGuava implements Supplier<ImmutableListMultimap<String, Car>> {
         private final Db db;
 
         public IndexCarsByBrandGuava(final Db db) {
@@ -101,14 +101,14 @@ public class IndexCarsByBrandTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public ImmutableListMultimap<String, Car> get() {
             final ImmutableListMultimap<String, Car> carsByBrand = Multimaps.index(db.getCars(), new Function<Car, String>() {
                 @Override
                 public String apply(final Car input) {
                     return input.getBrand();
                 }
             });
-            return null;
+            return carsByBrand;
         }
     }
 }

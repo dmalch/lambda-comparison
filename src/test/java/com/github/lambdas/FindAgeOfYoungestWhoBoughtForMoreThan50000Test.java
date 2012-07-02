@@ -51,7 +51,7 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
         performMeasurements(functionToMeasure);
     }
 
-    private class FindAgeOfYoungestWhoBoughtForMoreThan50000Iterable implements Supplier<Void> {
+    private class FindAgeOfYoungestWhoBoughtForMoreThan50000Iterable implements Supplier<Integer> {
         private final Db db;
 
         public FindAgeOfYoungestWhoBoughtForMoreThan50000Iterable(final Db db) {
@@ -59,7 +59,7 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
         }
 
         @Override
-        public Void get() {
+        public Integer get() {
             int age = Integer.MAX_VALUE;
             for (final Sale sale : db.getSales()) {
                 if (sale.getCost() > 50000.00) {
@@ -69,11 +69,11 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
                     }
                 }
             }
-            return null;
+            return age;
         }
     }
 
-    private class FindAgeOfYoungestWhoBoughtForMoreThan50000LambdaJ implements Supplier<Void> {
+    private class FindAgeOfYoungestWhoBoughtForMoreThan50000LambdaJ implements Supplier<Integer> {
         private final Db db;
 
         public FindAgeOfYoungestWhoBoughtForMoreThan50000LambdaJ(final Db db) {
@@ -81,14 +81,14 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
         }
 
         @Override
-        public Void get() {
+        public Integer get() {
             final int age = Lambda.min(forEach(select(db.getSales(), having(on(Sale.class).getCost(),
                     greaterThan(50000.00)))).getBuyer(), on(Person.class).getAge());
-            return null;
+            return age;
         }
     }
 
-    private class FindAgeOfYoungestWhoBoughtForMoreThan50000JDKLambda implements Supplier<Void> {
+    private class FindAgeOfYoungestWhoBoughtForMoreThan50000JDKLambda implements Supplier<Integer> {
         private final Db db;
 
         public FindAgeOfYoungestWhoBoughtForMoreThan50000JDKLambda(final Db db) {
@@ -96,16 +96,16 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
         }
 
         @Override
-        public Void get() {
+        public Integer get() {
             final int age = min(db.getSales()
                     .filter((Sale sale)->sale.getCost() > 50000.00)
                     .<Integer>map((Sale sale)->sale.getBuyer().getAge())
                     .into(new ArrayList<Integer>()));
-            return null;
+            return age;
         }
     }
 
-    private class FindAgeOfYoungestWhoBoughtForMoreThan50000Guava implements Supplier<Void> {
+    private class FindAgeOfYoungestWhoBoughtForMoreThan50000Guava implements Supplier<Integer> {
         private final Db db;
 
         public FindAgeOfYoungestWhoBoughtForMoreThan50000Guava(final Db db) {
@@ -113,7 +113,7 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
         }
 
         @Override
-        public Void get() {
+        public Integer get() {
             final int age = min(transform(filter(db.getSales(), new Predicate<Sale>() {
                 @Override
                 public boolean apply(final Sale input) {
@@ -125,7 +125,7 @@ public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeas
                     return input.getBuyer().getAge();
                 }
             }));
-            return null;
+            return age;
         }
     }
 }

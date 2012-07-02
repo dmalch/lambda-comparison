@@ -56,7 +56,7 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
-    private class ExtractCarsOriginalCostIterable implements Supplier<Void> {
+    private class ExtractCarsOriginalCostIterable implements Supplier<List<Double>> {
         private final Db db;
 
         public ExtractCarsOriginalCostIterable(final Db db) {
@@ -64,16 +64,16 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Double> get() {
             final List<Double> costs = new ArrayList<Double>();
             for (final Car car : db.getCars()) {
                 costs.add(car.getOriginalValue());
             }
-            return null;
+            return costs;
         }
     }
 
-    private class ExtractCarsOriginalCostLambdaJ implements Supplier<Void> {
+    private class ExtractCarsOriginalCostLambdaJ implements Supplier<List<Double>> {
         private final Db db;
 
         public ExtractCarsOriginalCostLambdaJ(final Db db) {
@@ -81,13 +81,13 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Double> get() {
             final List<Double> costs = extract(db.getCars(), on(Car.class).getOriginalValue());
-            return null;
+            return costs;
         }
     }
 
-    private class ExtractCarsOriginalCostJDKLambda implements Supplier<Void> {
+    private class ExtractCarsOriginalCostJDKLambda implements Supplier<Iterable<Double>> {
         private final Db db;
 
         public ExtractCarsOriginalCostJDKLambda(final Db db) {
@@ -95,13 +95,13 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Iterable<Double> get() {
             final Iterable<Double> costs = db.getCars().map((Car c)->c.getOriginalValue());
-            return null;
+            return costs;
         }
     }
 
-    private class ExtractCarsOriginalCostJDKLambdaWithListCreation implements Supplier<Void> {
+    private class ExtractCarsOriginalCostJDKLambdaWithListCreation implements Supplier<List<Double>> {
         private final Db db;
 
         public ExtractCarsOriginalCostJDKLambdaWithListCreation(final Db db) {
@@ -109,15 +109,15 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Double> get() {
             final List<Double> costs = db.getCars()
                     .<Double>map((Car c)->c.getOriginalValue())
                     .into(new ArrayList<Double>());
-            return null;
+            return costs;
         }
     }
 
-    private class ExtractCarsOriginalCostGuava implements Supplier<Void> {
+    private class ExtractCarsOriginalCostGuava implements Supplier<List<Double>> {
         private final Db db;
 
         public ExtractCarsOriginalCostGuava(final Db db) {
@@ -125,7 +125,7 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Double> get() {
             final List<Double> costs = Lists.newArrayList(transform(db.getCars(), new Function<Car, Double>() {
                 @Override
                 public Double apply(final Car input) {
@@ -133,7 +133,7 @@ public class ExtractCarsOriginalCostTest extends AbstractMeasurementTest {
                 }
             }));
 
-            return null;
+            return costs;
         }
     }
 }

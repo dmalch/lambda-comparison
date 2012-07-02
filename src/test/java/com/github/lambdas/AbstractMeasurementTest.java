@@ -19,7 +19,7 @@ public abstract class AbstractMeasurementTest {
     public static final int ITERATIONS_COUNT = 100000;
     public static final int MEASUREMENTS_COUNT = 100;
 
-    protected void performMeasurements(final Supplier<Void> functionToMeasure) {
+    protected void performMeasurements(final Supplier functionToMeasure) {
         logger.info(format("================<{0}>================", functionToMeasure.getClass().getSimpleName()));
 
         final ArrayList<Long> measurements = Lists.newArrayList();
@@ -33,7 +33,7 @@ public abstract class AbstractMeasurementTest {
         logger.info(format("Avg elapsed time: {0}", Lambda.<Long>avg(measurements)));
     }
 
-    private long performMeasurement(final Supplier<Void> toMeasure) {
+    private long performMeasurement(final Supplier toMeasure) {
 
         final Stopwatch stopWatch = new Stopwatch();
         stopWatch.start();

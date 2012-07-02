@@ -50,7 +50,7 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
-    private class SelectAllSalesOfFerrariIterable implements Supplier<Void> {
+    private class SelectAllSalesOfFerrariIterable implements Supplier<List<Sale>> {
         private final Db db;
 
         public SelectAllSalesOfFerrariIterable(final Db db) {
@@ -58,17 +58,17 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> salesOfAFerrari = new ArrayList<Sale>();
             for (final Sale sale : db.getSales()) {
                 if (sale.getCar().getBrand().equals("Ferrari"))
                     salesOfAFerrari.add(sale);
             }
-            return null;
+            return salesOfAFerrari;
         }
     }
 
-    private class SelectAllSalesOfFerrariLambdaJ implements Supplier<Void> {
+    private class SelectAllSalesOfFerrariLambdaJ implements Supplier<List<Sale>> {
         private final Db db;
 
         public SelectAllSalesOfFerrariLambdaJ(final Db db) {
@@ -76,14 +76,14 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> salesOfAFerrari = Lambda.select(db.getSales(),
                     having(on(Sale.class).getCar().getBrand(), equalTo("Ferrari")));
-            return null;
+            return salesOfAFerrari;
         }
     }
 
-    private class SelectAllSalesOfFerrariJDKLambda implements Supplier<Void> {
+    private class SelectAllSalesOfFerrariJDKLambda implements Supplier<List<Sale>> {
         private final Db db;
 
         public SelectAllSalesOfFerrariJDKLambda(final Db db) {
@@ -91,13 +91,13 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> salesOfAFerrari = db.getSales().filter((Sale s)->s.getCar().getBrand().equals("Ferrari")).into(new ArrayList<Sale>());
-            return null;
+            return salesOfAFerrari;
         }
     }
 
-    private class SelectAllSalesOfFerrariGuava implements Supplier<Void> {
+    private class SelectAllSalesOfFerrariGuava implements Supplier<List<Sale>> {
         private final Db db;
 
         public SelectAllSalesOfFerrariGuava(final Db db) {
@@ -105,14 +105,14 @@ public class SelectAllSalesOfFerrariTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final List<Sale> salesOfAFerrari = newArrayList(filter(db.getSales(), new Predicate<Sale>() {
                 @Override
                 public boolean apply(final Sale input) {
                     return input.getCar().getBrand().equals("Ferrari");
                 }
             }));
-            return null;
+            return salesOfAFerrari;
         }
     }
 }

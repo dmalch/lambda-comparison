@@ -82,7 +82,7 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
         }
     }
 
-    private class FindMostBoughtCarLambdaJ implements Supplier<Void> {
+    private class FindMostBoughtCarLambdaJ implements Supplier<Car> {
         private final Db db;
 
         public FindMostBoughtCarLambdaJ(final Db db) {
@@ -90,16 +90,15 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Car get() {
             final Group<Sale> group = selectMax(
                     group(db.getSales(), by(on(Sale.class).getCar())).subgroups(), on(Group.class).getSize());
             final Car mostBoughtCar = group.findAll().get(0).getCar();
-            final int boughtTimes = group.getSize();
-            return null;
+            return mostBoughtCar;
         }
     }
 
-    private class FindMostBoughtCarJDKLambda implements Supplier<Void> {
+    private class FindMostBoughtCarJDKLambda implements Supplier<Car> {
         private final Db db;
 
         public FindMostBoughtCarJDKLambda(final Db db) {
@@ -107,18 +106,16 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Car get() {
             final Iterable<Sale> max = calcMax(db.getSales().groupBy((Sale s)->s.getCar()).values(),
                     (final Iterable<Sale> o1, final Iterable<Sale> o2)->Long.compare(o1.count(), o2.count()));
 
             final Car mostBoughtCar = max.getFirst().getCar();
-            final long boughtTimes = max.count();
-
-            return null;
+            return mostBoughtCar;
         }
     }
 
-    private class FindMostBoughtCarGuava implements Supplier<Void> {
+    private class FindMostBoughtCarGuava implements Supplier<Car> {
         private final Db db;
 
         public FindMostBoughtCarGuava(final Db db) {
@@ -126,7 +123,7 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public Car get() {
             final Collection<Sale> max = max(index(db.getSales(), new Function<Sale, Car>() {
                 @Override
                 public Car apply(final Sale input) {
@@ -139,9 +136,7 @@ public class FindMostBoughtCarTest extends AbstractMeasurementTest {
                 }
             });
             final Car mostBoughtCar = getFirst(max, null).getCar();
-            final long boughtTimes = max.size();
-
-            return null;
+            return mostBoughtCar;
         }
     }
 }

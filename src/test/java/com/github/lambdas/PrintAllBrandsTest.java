@@ -46,7 +46,7 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
-    private class PrintAllBrandsIterable implements Supplier<Void> {
+    private class PrintAllBrandsIterable implements Supplier<String> {
         private final Db db;
 
         public PrintAllBrandsIterable(final Db db) {
@@ -54,17 +54,17 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public String get() {
             final StringBuilder sb = new StringBuilder();
             for (final Car car : db.getCars()) {
                 sb.append(car.getBrand()).append(", ");
             }
             final String brands = sb.toString().substring(0, sb.length() - 2);
-            return null;
+            return brands;
         }
     }
 
-    private class PrintAllBrandsLambdaJ implements Supplier<Void> {
+    private class PrintAllBrandsLambdaJ implements Supplier<String> {
         private final Db db;
 
         public PrintAllBrandsLambdaJ(final Db db) {
@@ -72,13 +72,13 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public String get() {
             final String brands = Lambda.joinFrom(db.getCars()).getBrand();
-            return null;
+            return brands;
         }
     }
 
-    private class PrintAllBrandsJDKLambda implements Supplier<Void> {
+    private class PrintAllBrandsJDKLambda implements Supplier<String> {
         private final Db db;
 
         public PrintAllBrandsJDKLambda(final Db db) {
@@ -86,14 +86,14 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public String get() {
             final StringJoiner stringJoiner = db.getCars().<String>map((Car c)->c.getBrand()).into(new StringJoiner(","));
             final String brands = stringJoiner.toString();
-            return null;
+            return brands;
         }
     }
 
-    private class PrintAllBrandsGuava implements Supplier<Void> {
+    private class PrintAllBrandsGuava implements Supplier<String> {
         private final Db db;
 
         public PrintAllBrandsGuava(final Db db) {
@@ -101,14 +101,14 @@ public class PrintAllBrandsTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public String get() {
             final String brands = on(",").join(transform(db.getCars(), new Function<Car, String>() {
                 @Override
                 public String apply(final Car input) {
                     return input.getBrand();
                 }
             }));
-            return null;
+            return brands;
         }
     }
 }

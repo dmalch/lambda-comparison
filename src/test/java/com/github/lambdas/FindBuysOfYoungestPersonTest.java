@@ -51,7 +51,7 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
         performMeasurements(functionToMeasure);
     }
 
-    private class FindBuysOfYoungestPersonIterable implements Supplier<Void> {
+    private class FindBuysOfYoungestPersonIterable implements Supplier<List<Sale>> {
         private final Db db;
 
         public FindBuysOfYoungestPersonIterable(final Db db) {
@@ -59,7 +59,7 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             Person youngest = null;
             for (final Person person : db.getPersons()) {
                 if (youngest == null || person.getAge() < youngest.getAge()) {
@@ -72,11 +72,11 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
                     buys.add(sale);
                 }
             }
-            return null;
+            return buys;
         }
     }
 
-    private class FindBuysOfYoungestPersonLambdaJ implements Supplier<Void> {
+    private class FindBuysOfYoungestPersonLambdaJ implements Supplier<List<Sale>> {
         private final Db db;
 
         public FindBuysOfYoungestPersonLambdaJ(final Db db) {
@@ -84,14 +84,14 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
-            final List<Sale> sales = select(db.getSales(), having(on(Sale.class).getBuyer(),
+        public List<Sale> get() {
+            final List<Sale> buys = select(db.getSales(), having(on(Sale.class).getBuyer(),
                     equalTo(selectMin(db.getPersons(), on(Person.class).getAge()))));
-            return null;
+            return buys;
         }
     }
 
-    private class FindBuysOfYoungestPersonJDKLambda implements Supplier<Void> {
+    private class FindBuysOfYoungestPersonJDKLambda implements Supplier<List<Sale>> {
         private final Db db;
 
         public FindBuysOfYoungestPersonJDKLambda(final Db db) {
@@ -99,16 +99,16 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final Person min = min(db.getPersons(), (Person p1, Person p2)->Integer.compare(p1.getAge(), p2.getAge()));
-            final List<Sale> sales = db.getSales()
+            final List<Sale> buys = db.getSales()
                     .filter((Sale s)->s.getBuyer().equals(min))
                     .into(new ArrayList<Sale>());
-            return null;
+            return buys;
         }
     }
 
-    private class FindBuysOfYoungestPersonGuava implements Supplier<Void> {
+    private class FindBuysOfYoungestPersonGuava implements Supplier<List<Sale>> {
         private final Db db;
 
         public FindBuysOfYoungestPersonGuava(final Db db) {
@@ -116,21 +116,21 @@ public class FindBuysOfYoungestPersonTest extends AbstractMeasurementTest {
         }
 
         @Override
-        public Void get() {
+        public List<Sale> get() {
             final Person min = min(db.getPersons(), new Comparator<Person>() {
                 @Override
                 public int compare(final Person o1, final Person o2) {
                     return Integer.compare(o1.getAge(), o2.getAge());
                 }
             });
-            final List<Sale> sales = newArrayList(filter(db.getSales(), new Predicate<Sale>() {
+            final List<Sale> buys = newArrayList(filter(db.getSales(), new Predicate<Sale>() {
                 @Override
                 public boolean apply(final Sale input) {
                     return input.getBuyer().equals(min);
                 }
             }));
 
-            return null;
+            return buys;
         }
     }
 }
