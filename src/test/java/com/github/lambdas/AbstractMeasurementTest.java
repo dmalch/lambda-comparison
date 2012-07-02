@@ -14,14 +14,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import static java.text.MessageFormat.format;
 
 public abstract class AbstractMeasurementTest {
     private static final transient Logger logger = LoggerFactory.getLogger(PrintAllBrandsTest.class);
-    public static final int ITERATIONS_COUNT = 100000;
-    public static final int MEASUREMENTS_COUNT = 1000;
-    public static final int WARMUP_MEASUREMENTS_COUNT = 1000;
+    public static final int ITERATIONS_COUNT = 10;
+    public static final int WARMUP_ITERATIONS_COUNT = 10;
+    public static final int ITERATION_DURATION_MSEC = 1000;
 
     protected void performMeasurements(final Supplier functionToMeasure) {
         logger.info(format("================<{0}>================", functionToMeasure.getClass().getSimpleName()));
@@ -47,7 +48,7 @@ public abstract class AbstractMeasurementTest {
     }
 
     private void warmup(final Supplier functionToMeasure) {
-        for (int i = 0; i < WARMUP_MEASUREMENTS_COUNT; i++) {
+        for (int i = 0; i < WARMUP_ITERATIONS_COUNT; i++) {
             performMeasurement(functionToMeasure);
         }
     }
@@ -55,27 +56,52 @@ public abstract class AbstractMeasurementTest {
     private ArrayList<Long> benchmark(final Supplier functionToMeasure) {
         final ArrayList<Long> measurements = Lists.newArrayList();
 
-        for (int i = 0; i < MEASUREMENTS_COUNT; i++) {
-            measurements.add(performMeasurement(functionToMeasure));
+        for (int i = 0; i < ITERATIONS_COUNT; i++) {
+            long time = performMeasurement(functionToMeasure);
+            logger.info("Iteration " + i + ": " + time);
+            measurements.add(time);
         }
         return measurements;
     }
 
+    private volatile boolean shouldStop;
     private Object result;
 
     private long performMeasurement(final Supplier toMeasure) {
 
+        Thread finishThread = new Thread(new FinishNotifyTask());
+        finishThread.start();
+
         final Stopwatch stopWatch = new Stopwatch();
         stopWatch.start();
-        for (int i = 0; i < ITERATIONS_COUNT; i++) {
-            // This is a desperate attempt to prevent dead-code elimination in get().
-            // However, this is not enough for compiler to unroll the loop, and store the last result only.
-            // FIXME: This should be done cleaner.
+
+        long count = 0;
+        shouldStop = false;
+        while (!shouldStop) {
             result = toMeasure.get();
+            count++;
         }
         stopWatch.stop();
 
-        return stopWatch.elapsedMillis();
+        try {
+            finishThread.join();
+        } catch (InterruptedException e) {
+            // do nothing
+        }
+
+        return stopWatch.elapsedTime(TimeUnit.NANOSECONDS) / count;
+    }
+
+    private class FinishNotifyTask implements Runnable {
+
+        public void run() {
+            try {
+                TimeUnit.MILLISECONDS.sleep(ITERATION_DURATION_MSEC);
+            } catch (InterruptedException e) {
+
+            }
+            shouldStop = true;
+        }
     }
 
     protected <T extends Object & Comparable<? super T>> T calcMax(final Iterable<T> map) {
