@@ -13,11 +13,11 @@ import java.util.ArrayList;
 
 import static ch.lambdaj.Lambda.forEach;
 import static ch.lambdaj.Lambda.having;
+import static ch.lambdaj.Lambda.min;
 import static ch.lambdaj.Lambda.on;
 import static ch.lambdaj.Lambda.select;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
-import static java.util.Collections.min;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 
 public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeasurementTest {
