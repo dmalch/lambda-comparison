@@ -1,9 +1,12 @@
 package com.github.lambdas;
 
-import ch.lambdaj.Lambda;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Doubles;
+import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,20 +20,45 @@ import static java.text.MessageFormat.format;
 public abstract class AbstractMeasurementTest {
     private static final transient Logger logger = LoggerFactory.getLogger(PrintAllBrandsTest.class);
     public static final int ITERATIONS_COUNT = 100000;
-    public static final int MEASUREMENTS_COUNT = 100;
+    public static final int MEASUREMENTS_COUNT = 1000;
+    public static final int WARMUP_MEASUREMENTS_COUNT = 1000;
 
     protected void performMeasurements(final Supplier functionToMeasure) {
         logger.info(format("================<{0}>================", functionToMeasure.getClass().getSimpleName()));
 
+        warmup(functionToMeasure);
+        final ArrayList<Long> statistics = benchmark(functionToMeasure);
+        printStatistics(statistics);
+    }
+
+    private void printStatistics(final ArrayList<Long> statistics) {
+        final StatisticalSummary descriptiveStatistics = new DescriptiveStatistics(Doubles.toArray(statistics));
+        logger.info(format("Min elapsed time: {0}", descriptiveStatistics.getMin()));
+        logger.info(format("Max elapsed time: {0}", descriptiveStatistics.getMax()));
+        logger.info(format("Avg elapsed time: {0}", descriptiveStatistics.getMean()));
+        logger.info(format("Standard deviation: {0}", descriptiveStatistics.getStandardDeviation()));
+        logger.info(format("Confidence interval width: {0}", getConfidenceIntervalWidth(descriptiveStatistics, 0.95)));
+    }
+
+    private double getConfidenceIntervalWidth(final StatisticalSummary statisticalSummary, final double significance) {
+        final TDistribution tDist = new TDistribution(statisticalSummary.getN() - 1);
+        final double a = tDist.inverseCumulativeProbability(1.0 - significance / 2);
+        return a * statisticalSummary.getStandardDeviation() / Math.sqrt(statisticalSummary.getN());
+    }
+
+    private void warmup(final Supplier functionToMeasure) {
+        for (int i = 0; i < WARMUP_MEASUREMENTS_COUNT; i++) {
+            performMeasurement(functionToMeasure);
+        }
+    }
+
+    private ArrayList<Long> benchmark(final Supplier functionToMeasure) {
         final ArrayList<Long> measurements = Lists.newArrayList();
 
         for (int i = 0; i < MEASUREMENTS_COUNT; i++) {
             measurements.add(performMeasurement(functionToMeasure));
         }
-
-        logger.info(format("Min elapsed time: {0}", Lambda.<Long>min(measurements)));
-        logger.info(format("Max elapsed time: {0}", Lambda.<Long>max(measurements)));
-        logger.info(format("Avg elapsed time: {0}", Lambda.<Long>avg(measurements)));
+        return measurements;
     }
 
     private long performMeasurement(final Supplier toMeasure) {
