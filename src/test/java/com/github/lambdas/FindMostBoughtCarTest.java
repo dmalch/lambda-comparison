@@ -13,8 +13,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ch.lambdaj.Lambda.*;
+import static ch.lambdaj.Lambda.on;
+import static ch.lambdaj.Lambda.selectMax;
 import static ch.lambdaj.group.Groups.by;
+import static ch.lambdaj.group.Groups.group;
 import static com.google.common.collect.Iterables.getFirst;
 import static com.google.common.collect.Iterables.size;
 import static com.google.common.collect.Multimaps.index;
