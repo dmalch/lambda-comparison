@@ -18,7 +18,7 @@ import static ch.lambdaj.Lambda.on;
 import static ch.lambdaj.Lambda.select;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
-import static org.hamcrest.number.OrderingComparisons.greaterThan;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
 
 public class FindAgeOfYoungestWhoBoughtForMoreThan50000Test extends AbstractMeasurementTest {
 
