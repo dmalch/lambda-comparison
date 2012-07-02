@@ -1,4 +1,4 @@
-lambda-comporation
+lambda-comparison
 ==================
 
-Comporation of LambdaJ with JDK8 Lambdas
+Comparison of LambdaJ with JDK8 Lambdas
