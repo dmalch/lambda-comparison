@@ -18,26 +18,26 @@ import java.util.Iterator;
 import static java.text.MessageFormat.format;
 
 public abstract class AbstractMeasurementTest {
-    private static final transient Logger logger = LoggerFactory.getLogger(PrintAllBrandsTest.class);
+    private static final transient Logger logger = LoggerFactory.getLogger(AbstractMeasurementTest.class);
     public static final int ITERATIONS_COUNT = 100000;
-    public static final int MEASUREMENTS_COUNT = 1000;
-    public static final int WARMUP_MEASUREMENTS_COUNT = 1000;
+    public static final int MEASUREMENTS_COUNT = 100;
+    public static final int WARMUP_MEASUREMENTS_COUNT = 100;
 
     protected void performMeasurements(final Supplier functionToMeasure) {
         logger.info(format("================<{0}>================", functionToMeasure.getClass().getSimpleName()));
 
         warmup(functionToMeasure);
         final ArrayList<Long> statistics = benchmark(functionToMeasure);
-        printStatistics(statistics);
+        printStatistics(functionToMeasure, statistics);
     }
 
-    private void printStatistics(final ArrayList<Long> statistics) {
+    private void printStatistics(final Supplier functionToMeasure, final ArrayList<Long> statistics) {
         final StatisticalSummary descriptiveStatistics = new DescriptiveStatistics(Doubles.toArray(statistics));
-        logger.info(format("Min elapsed time: {0}", descriptiveStatistics.getMin()));
-        logger.info(format("Max elapsed time: {0}", descriptiveStatistics.getMax()));
-        logger.info(format("Avg elapsed time: {0}", descriptiveStatistics.getMean()));
-        logger.info(format("Standard deviation: {0}", descriptiveStatistics.getStandardDeviation()));
-        logger.info(format("Confidence interval width: {0}", getConfidenceIntervalWidth(descriptiveStatistics, 0.95)));
+        logger.info(format("{0}: Min elapsed time: {1}", functionToMeasure.getClass().getSimpleName(), descriptiveStatistics.getMin()));
+        logger.info(format("{0}: Max elapsed time: {1}", functionToMeasure.getClass().getSimpleName(), descriptiveStatistics.getMax()));
+        logger.info(format("{0}: Avg elapsed time: {1}", functionToMeasure.getClass().getSimpleName(), descriptiveStatistics.getMean()));
+        logger.info(format("{0}: Standard deviation: {1}", functionToMeasure.getClass().getSimpleName(), descriptiveStatistics.getStandardDeviation()));
+        logger.info(format("{0}: Confidence interval width: {1}", functionToMeasure.getClass().getSimpleName(), getConfidenceIntervalWidth(descriptiveStatistics, 0.95)));
     }
 
     private double getConfidenceIntervalWidth(final StatisticalSummary statisticalSummary, final double significance) {
